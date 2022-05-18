@@ -4,6 +4,7 @@ import { Component } from "react";
 class App extends Component{  
   // class fields
   state = {
+    counter: 0,
     posts: [
       {
         id: 1,
@@ -22,11 +23,43 @@ class App extends Component{
       }
     ]
   };
+
+  timeoutUpdate = null;
+
+  // Esse metodo executa uma acao sempre que o component for montado na tela
+  componentDidMount() {
+    console.log('mount');
+    this.handleTimeOut();
+  }
+  
+  // efetua uma acao sempre que estado de um componente for modificado
+  componentDidUpdate() {
+    console.log('update');
+    /* this.handleTimeOut(); */
+  }
+
+  // Efetua uma acao logo que o componente for desmontado da pagina
+  // muito util para retirar lixo de componentes que não existem mais na pagina
+  componentWillUnmount() {
+    clearTimeout(this.timeoutUpdate);
+  }
+
+
+  handleTimeOut = () => {
+    const { posts, counter }= this.state;
+    posts[0].title = 'Novo título';
+
+    this.timeoutUpdate = setTimeout(() => {
+      this.setState({posts, counter: counter + 1})
+    }, 5000);
+  }
+
+
   
   render(){
 
     // pegar a variavel nome de dentro do state
-    const { posts }= this.state;
+    const { posts, counter }= this.state;
 
     /* 
     Toda vez que eu for itera por um array e for imprimir na tela,
@@ -38,6 +71,7 @@ class App extends Component{
 
     return (
       <div className="App">
+        <h1>Contador: {counter}</h1>
         {posts.map(post => <h1 key={post.id}>{post.title}</h1>)}
       </div>
     )
