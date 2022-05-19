@@ -1,4 +1,5 @@
 import { PostCard } from '../PostCard/index';
+import './styles.css'
 
 export const Posts = (props) => {
   const posts = props.posts;

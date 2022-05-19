@@ -1,0 +1,23 @@
+.button-load-posts {
+  border: none;
+  background-color: rgb(95, 245, 58);
+  padding: 20px;
+  border-radius: 10px;
+  font-weight: 700;
+
+  margin-top: 30px;
+  transition: 300ms;
+  
+}
+
+.button-load-posts:disabled {
+  background-color: #888;
+  cursor:not-allowed;
+}
+
+.button-load-posts:not(:disabled):hover {
+  background-color: rgb(77, 192, 48);
+  transform: scale(1.05);
+
+  cursor: pointer;
+}
