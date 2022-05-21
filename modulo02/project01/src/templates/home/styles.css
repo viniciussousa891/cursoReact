@@ -8,6 +8,14 @@
   display: flex;
   flex-direction: column;
   align-items:center;
-  justify-content: space-between;
+}
+
+.search-container{
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.search-container h1 {
+  margin-bottom: 30px;
 }
 
