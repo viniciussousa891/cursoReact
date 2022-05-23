@@ -1,107 +1,103 @@
-import { Component } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { loadPosts } from '../../components/utils/load-posts'
 import { Posts } from "../../components/Posts/index";
 import './styles.css';
 import { Button } from '../../components/Button';
-import Input from "../../components/input";
+import { Input } from "../../components/input";
 
-export class Home extends Component{  
-  // class fields
-  state = {
+export const Home = () => {
+
+
+/*   state = {
     posts: [],
     allPosts: [],
     page: 0,
     postPerPage: 3,
     searchValue: '',
-  };
+  }; */
 
-  // Esse metodo executa uma acao sempre que o component for montado na tela
-  async componentDidMount() {
-    await this.loadPost();
-  }
+  /* 
   
-  loadPost = async () => {
-    const { page,  postPerPage} = this.state;
+  estrutura do useState()
+  const [ **componente, **funcao que altera o estado do componente ] = useState(**estado inicial do componente);
+  
+  ex:
+  const [ posts, setPosts ] = useState([]);
+  # posts é o meu componente
+  # setPosts é a funcao que vai alterar o estado do meu componente
+  # [] dentro do useState é o estado inicial do meu componente
+
+  */
+
+  const [ posts, setPosts ] = useState([]);
+  const [ allPosts, setAllPosts ] = useState([]);
+  const [ page, setPage ] = useState(0);
+  const [ postPerPage ] = useState(3);
+  const [ searchValue, setSearchValue ] = useState('');
+
+  const noMorePosts = page + postPerPage >= allPosts.length;
+
+  const filteredPosts = !!searchValue ? 
+  allPosts.filter(post => {
+    return post.title.toLowerCase().includes(searchValue.toLowerCase());
+  }) : posts;
+
+
+  // loadPost antigo
+  const handleLoadPost = useCallback(async (page, postPerPage) => {
     const postsAndPhotos = await loadPosts();
 
-    this.setState({ 
-      posts: postsAndPhotos.slice(page, postPerPage),
-      allPosts: postsAndPhotos,
-    });
-  }
+    setPosts(postsAndPhotos.slice(page, postPerPage));
+    setAllPosts(postsAndPhotos);
+  }, []);
 
-  loadMorePost = () => {
+  useEffect(() => {
+    handleLoadPost(0, postPerPage);
+  }, [handleLoadPost, postPerPage]);
 
-    console.log('Carregar posts');
-    const {
-      page,
-      postPerPage,
-      allPosts,
-      posts,
-    } = this.state
+  const loadMorePost = () => {
     
     const nextPage = page + postPerPage;
     const nextPosts = allPosts.slice(nextPage, nextPage + postPerPage)
 
     posts.push(...nextPosts);
 
-    this.setState({posts, page: nextPage});
+    setPosts(posts);
+    setPage(nextPage);
   }
 
-  handleChange = (e) => {
+  const handleChange = (e) => {
     const { value } = e.target;
-    this.setState({searchValue: value})
+    setSearchValue(value);
+  }
+
+  return (
+    <section className='container'>
+    <div className="search-container">
+      {!!searchValue && ( // Avaliacao por curto-circuito
+          <h1>Search value: {searchValue}</h1>
+        )
+      }
+      <Input searchValue={searchValue} handleChange={handleChange}/>
+    </div>
     
-  }
 
-  render(){
+      {filteredPosts.length > 0 && (
+        <Posts posts={filteredPosts}/>
+      )}
 
-    // pegar a variavel nome de dentro do state
-    const { posts, page, postPerPage, allPosts, searchValue }= this.state;
-    const noMorePosts = page + postPerPage >= allPosts.length;
+      {filteredPosts.length === 0 && (
+        <p>Não existem posts :(</p>
+      )}
 
-    // verifica se searchValue possui algum valor
-    // caso tenha, filtra os post que possuem o titulo o valor de searchValue
-    const filteredPosts = !!searchValue ? 
-    allPosts.filter(post => {
-      return post.title.toLowerCase().includes(searchValue.toLowerCase());
-    }) : posts;
-
-    /* 
-    Toda vez que eu for itera por um array e for imprimir na tela,
-    o react exige que eu identifique de forma unica cada item que será 
-    gerado (para futuras renderizacoes especificas do react). Uma forma
-    eh atribuir para a tag criar uma key com uma informacao unica dela
-    (por exemplo, o id)
-    */
-    return (
-      <section className='container'>
-      <div className="search-container">
-        {!!searchValue && ( // Avaliacao por curto-circuito
-            <h1>Search value: {searchValue}</h1>
-          )
-        }
-        <Input searchValue={searchValue} handleChange={this.handleChange}/>
-      </div>
+      {!searchValue && ( /* Fazer o botão sumir sempre que uma busca for iniciada */
+        <Button
+        disabled={noMorePosts}
+        text='Load more posts' 
+        onClick={loadMorePost}/>
+      )}
       
+    </section>
 
-        {filteredPosts.length > 0 && (
-          <Posts posts={filteredPosts}/>
-        )}
-
-        {filteredPosts.length === 0 && (
-          <p>Não existem posts :(</p>
-        )}
-
-        {!searchValue && ( /* Fazer o botão sumir sempre que uma busca for iniciada */
-          <Button
-          disabled={noMorePosts}
-          text='Load more posts' 
-          onClick={this.loadMorePost}/>
-        )}
-        
-      </section>
-
-    )
-  }
+  )
 }
